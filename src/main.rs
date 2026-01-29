@@ -100,7 +100,7 @@ fn main() {
             file.read_to_end(&mut buf)
                 .expect("Failed to read encrypted file");
 
-            let (_, data) = decrypt_file(&buf, &password).expect("Decryption failed");
+            let data = decrypt_file(&buf, &password).expect("Decryption failed");
 
             let out_path = match &args.output {
                 Some(path) if !path.is_empty() => Path::new(path).to_path_buf(),
