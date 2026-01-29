@@ -115,7 +115,7 @@ fn main() {
         }
     }
 }
-fn decrypt_file(buf: &[u8], password: &str) -> Result<(String, Vec<u8>), String> {
+fn decrypt_file(buf: &[u8], password: &str) -> Result<Vec<u8>, String> {
     let mut offset = 0;
     if buf.len() < offset + SALT_LEN {
         return Err("Invalid file: missing salt1".to_string());
@@ -181,7 +181,7 @@ fn decrypt_file(buf: &[u8], password: &str) -> Result<(String, Vec<u8>), String>
     let filename_bytes = cipher1
         .decrypt(Nonce::from_slice(nonce1), enc_filename)
         .map_err(|_| "Failed to decrypt filename".to_string())?;
-    let filename =
+    let _ =
         String::from_utf8(filename_bytes).map_err(|_| "Filename is not valid UTF-8".to_string())?;
     let mut key2 = [0u8; KEY_LEN];
     pbkdf2_hmac::<Sha256>(password.as_bytes(), salt2, PBKDF2_ITER, &mut key2);
@@ -189,7 +189,7 @@ fn decrypt_file(buf: &[u8], password: &str) -> Result<(String, Vec<u8>), String>
     let data = cipher2
         .decrypt(Nonce::from_slice(nonce2), enc_data)
         .map_err(|_| "Failed to decrypt data".to_string())?;
-    Ok((filename, data))
+    Ok(data)
 }
 
 fn encrypt_with_password(
