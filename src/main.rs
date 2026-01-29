@@ -48,7 +48,6 @@ fn main() {
         std::process::exit(1);
     }
 
-    // Load password from password file
     let password = fs::read_to_string(&args.password_file)
         .expect("Failed to read password file")
         .trim()
@@ -72,8 +71,12 @@ fn main() {
 
             let (enc_data, salt2, nonce2) = encrypt_with_password(&file_data, &password);
 
-            let out_dir = args.output.unwrap_or_else(|| ".".to_string());
-            let out_path = Path::new(&out_dir).join(filename);
+            let out_dir = args.output.unwrap_or_default();
+            let out_path = if out_dir.is_empty() {
+                input_path.to_path_buf()
+            } else {
+                Path::new(&out_dir).join(filename)
+            };
             let mut out_file = File::create(&out_path).expect("Failed to create output file");
 
             out_file.write_all(&salt1).unwrap();
@@ -101,8 +104,12 @@ fn main() {
 
             let (filename, data) = decrypt_file(&buf, &password).expect("Decryption failed");
 
-            let out_dir = args.output.unwrap_or_else(|| ".".to_string());
-            let out_path = Path::new(&out_dir).join(&filename);
+            let out_dir = args.output.unwrap_or_default();
+            let out_path = if out_dir.is_empty() {
+                input_path.to_path_buf()
+            } else {
+                Path::new(&out_dir).join(filename)
+            };
             let mut out_file = File::create(&out_path).expect("Failed to create output file");
             out_file
                 .write_all(&data)
