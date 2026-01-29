@@ -71,11 +71,9 @@ fn main() {
 
             let (enc_data, salt2, nonce2) = encrypt_with_password(&file_data, &password);
 
-            let out_dir = args.output.unwrap_or_default();
-            let out_path = if out_dir.is_empty() {
-                input_path.to_path_buf()
-            } else {
-                Path::new(&out_dir).join(filename)
+            let out_path = match &args.output {
+                Some(path) if !path.is_empty() => Path::new(path).to_path_buf(),
+                _ => input_path.to_path_buf(),
             };
             let mut out_file = File::create(&out_path).expect("Failed to create output file");
 
@@ -102,13 +100,11 @@ fn main() {
             file.read_to_end(&mut buf)
                 .expect("Failed to read encrypted file");
 
-            let (filename, data) = decrypt_file(&buf, &password).expect("Decryption failed");
+            let (_, data) = decrypt_file(&buf, &password).expect("Decryption failed");
 
-            let out_dir = args.output.unwrap_or_default();
-            let out_path = if out_dir.is_empty() {
-                input_path.to_path_buf()
-            } else {
-                Path::new(&out_dir).join(filename)
+            let out_path = match &args.output {
+                Some(path) if !path.is_empty() => Path::new(path).to_path_buf(),
+                _ => input_path.to_path_buf(),
             };
             let mut out_file = File::create(&out_path).expect("Failed to create output file");
             out_file
